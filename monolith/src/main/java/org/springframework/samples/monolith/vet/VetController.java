@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.samples.petclinic.vet;
+package org.springframework.samples.monolith.vet;
+
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -38,8 +41,27 @@ class VetController {
 		this.vetRepository = clinicService;
 	}
 
-	@GetMapping("/findVetPage")
-	public Page<Vet> findPaginated(@RequestParam int page) {
+	@GetMapping("/vets.html")
+	public String showVetList(@RequestParam(defaultValue = "1") int page, Model model) {
+		// Here we are returning an object of type 'Vets' rather than a collection of Vet
+		// objects so it is simpler for Object-Xml mapping
+		Vets vets = new Vets();
+		Page<Vet> paginated = findPaginated(page);
+		vets.getVetList().addAll(paginated.toList());
+		return addPaginationModel(page, paginated, model);
+
+	}
+
+	private String addPaginationModel(int page, Page<Vet> paginated, Model model) {
+		List<Vet> listVets = paginated.getContent();
+		model.addAttribute("currentPage", page);
+		model.addAttribute("totalPages", paginated.getTotalPages());
+		model.addAttribute("totalItems", paginated.getTotalElements());
+		model.addAttribute("listVets", listVets);
+		return "vets/vetList";
+	}
+
+	private Page<Vet> findPaginated(int page) {
 		int pageSize = 5;
 		Pageable pageable = PageRequest.of(page - 1, pageSize);
 		return vetRepository.findAll(pageable);
@@ -53,4 +75,5 @@ class VetController {
 		vets.getVetList().addAll(this.vetRepository.findAll());
 		return vets;
 	}
+
 }
