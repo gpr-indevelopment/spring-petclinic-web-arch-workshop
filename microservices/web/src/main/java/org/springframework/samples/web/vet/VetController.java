@@ -16,6 +16,7 @@
 package org.springframework.samples.web.vet;
 
 import org.springframework.data.domain.Page;
+import org.springframework.samples.web.external.VetClient;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,12 @@ import java.util.List;
  */
 @Controller
 class VetController {
+
+	private final VetClient vetClient;
+
+	public VetController(VetClient vetClient) {
+		this.vetClient = vetClient;
+	}
 
 	@GetMapping("/vets.html")
 	public String showVetList(@RequestParam(defaultValue = "1") int page, Model model) {
@@ -54,14 +61,14 @@ class VetController {
 	}
 
 	private Page<Vet> findPaginated(int page) {
-		// TODO: 14/10/22 Chamada para vets
-		return Page.empty();
+		return vetClient.findPaginated(page);
 	}
 
 	@GetMapping({ "/vets" })
 	public @ResponseBody Vets showResourcesVetList() {
-		// TODO: 14/10/22 Chamada para vets
-		return new Vets();
+		Vets vets = new Vets();
+		vets.getVetList().addAll(vetClient.findAllVets());
+		return vets;
 	}
 
 }
