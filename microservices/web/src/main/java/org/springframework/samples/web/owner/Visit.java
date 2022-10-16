@@ -15,14 +15,21 @@
  */
 package org.springframework.samples.web.owner;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
+import javax.validation.constraints.NotEmpty;
 import java.time.LocalDate;
 
 
 public class Visit {
 
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate date;
 
+	@NotEmpty
 	private String description;
+
+	private Integer id;
 
 	/**
 	 * Creates a new instance of Visit for the current date
@@ -45,6 +52,18 @@ public class Visit {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public boolean isNew() {
+		return this.id == null;
 	}
 
 }

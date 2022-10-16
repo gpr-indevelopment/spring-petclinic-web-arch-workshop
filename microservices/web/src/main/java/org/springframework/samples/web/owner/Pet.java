@@ -15,6 +15,8 @@
  */
 package org.springframework.samples.web.owner;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -30,6 +32,7 @@ import java.util.Set;
 
 public class Pet {
 
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate birthDate;
 
 	private PetType type;

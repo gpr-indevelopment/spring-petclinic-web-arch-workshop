@@ -16,11 +16,11 @@
 package org.springframework.samples.web.owner;
 
 import org.springframework.format.Formatter;
+import org.springframework.samples.web.external.OwnerClient;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -36,6 +36,12 @@ import java.util.Locale;
 @Component
 public class PetTypeFormatter implements Formatter<PetType> {
 
+	private final OwnerClient ownerClient;
+
+	public PetTypeFormatter(OwnerClient ownerClient) {
+		this.ownerClient = ownerClient;
+	}
+
 	@Override
 	public String print(PetType petType, Locale locale) {
 		return petType.getName();
@@ -43,9 +49,7 @@ public class PetTypeFormatter implements Formatter<PetType> {
 
 	@Override
 	public PetType parse(String text, Locale locale) throws ParseException {
-		// TODO: 14/10/22 Buscar no serviço de owners
-		//Collection<PetType> findPetTypes = this.owners.findPetTypes();
-		Collection<PetType> findPetTypes = List.of();
+		Collection<PetType> findPetTypes = ownerClient.findPetTypes();
 		for (PetType type : findPetTypes) {
 			if (type.getName().equals(text)) {
 				return type;

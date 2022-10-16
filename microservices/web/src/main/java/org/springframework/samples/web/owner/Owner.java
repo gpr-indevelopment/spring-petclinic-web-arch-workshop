@@ -19,6 +19,8 @@ import org.springframework.core.style.ToStringCreator;
 import org.springframework.samples.web.Person;
 import org.springframework.util.Assert;
 
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,10 +29,14 @@ public class Owner extends Person {
 
 	private Integer id;
 
+	@NotEmpty
 	private String address;
 
+	@NotEmpty
 	private String city;
 
+	@NotEmpty
+	@Digits(fraction = 0, integer = 10)
 	private String telephone;
 
 	private List<Pet> pets = new ArrayList<>();

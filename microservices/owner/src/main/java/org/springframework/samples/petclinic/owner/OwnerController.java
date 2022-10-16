@@ -24,9 +24,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * @author Juergen Hoeller
@@ -34,7 +37,7 @@ import javax.validation.Valid;
  * @author Arjen Poutsma
  * @author Michael Isvy
  */
-@Controller
+@RestController
 class OwnerController {
 
 	private final OwnerRepository owners;
@@ -53,16 +56,21 @@ class OwnerController {
 		return ownerId == null ? new Owner() : this.owners.findById(ownerId);
 	}
 
-	@PostMapping("/owners/new")
-	public Owner processCreationForm(@Valid Owner owner) {
+	@PostMapping("/owners")
+	public Owner saveOwner(@Valid @RequestBody Owner owner) {
 		this.owners.save(owner);
 		return owner;
 	}
 
-	@GetMapping("/ownersByLastName")
-	public Page<Owner> processFindForm(@RequestParam(defaultValue = "1") int page, @RequestParam String lastName) {
+	@GetMapping("/owners")
+	public Page<Owner> findOwners(@RequestParam(defaultValue = "1") int page, @RequestParam String lastName) {
 		int pageSize = 5;
 		Pageable pageable = PageRequest.of(page - 1, pageSize);
 		return owners.findByLastName(lastName, pageable);
+	}
+
+	@GetMapping("/owners/pet-types")
+	public List<PetType> findPetTypes() {
+		return owners.findPetTypes();
 	}
 }

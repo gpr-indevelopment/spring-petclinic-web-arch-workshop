@@ -15,6 +15,7 @@
  */
 package org.springframework.samples.web.owner;
 
+import org.springframework.samples.web.external.OwnerClient;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
@@ -37,6 +38,11 @@ import java.util.Map;
 @Controller
 class VisitController {
 
+	private final OwnerClient ownerClient;
+
+	public VisitController(OwnerClient ownerClient) {
+		this.ownerClient = ownerClient;
+	}
 
 	@InitBinder
 	public void setAllowedFields(WebDataBinder dataBinder) {
@@ -53,9 +59,7 @@ class VisitController {
 	@ModelAttribute("visit")
 	public Visit loadPetWithVisit(@PathVariable("ownerId") int ownerId, @PathVariable("petId") int petId,
 			Map<String, Object> model) {
-		// TODO: 14/10/22 Buscar no serviço de owners
-		//Owner owner = this.owners.findById(ownerId);
-		Owner owner = new Owner();
+		Owner owner = ownerClient.findOwner(ownerId);
 
 		Pet pet = owner.getPet(petId);
 		model.put("pet", pet);
@@ -83,9 +87,8 @@ class VisitController {
 		}
 
 		owner.addVisit(petId, visit);
-		//this.owners.save(owner);
-		// TODO: 14/10/22 Salvar no serviço de owners
-		return "redirect:/owners/{ownerId}";
+		owner = ownerClient.saveOwner(owner);
+		return "redirect:/owners/" + owner.getId();
 	}
 
 }

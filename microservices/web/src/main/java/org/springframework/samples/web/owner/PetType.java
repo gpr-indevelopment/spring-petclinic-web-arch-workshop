@@ -21,6 +21,8 @@ package org.springframework.samples.web.owner;
 
 public class PetType {
 
+	private Integer id;
+
 	private String name;
 
 	public String getName() {
@@ -29,6 +31,14 @@ public class PetType {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
 	}
 
 	@Override

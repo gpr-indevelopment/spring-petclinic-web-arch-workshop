@@ -15,6 +15,7 @@
  */
 package org.springframework.samples.web.owner;
 
+import org.springframework.samples.web.external.OwnerClient;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
@@ -29,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author Juergen Hoeller
@@ -40,28 +40,28 @@ import java.util.List;
 @RequestMapping("/owners/{ownerId}")
 class PetController {
 
+	private final OwnerClient ownerClient;
+
+	public PetController(OwnerClient ownerClient) {
+		this.ownerClient = ownerClient;
+	}
+
 	private static final String VIEWS_PETS_CREATE_OR_UPDATE_FORM = "pets/createOrUpdatePetForm";
 
 	@ModelAttribute("types")
 	public Collection<PetType> populatePetTypes() {
-		// TODO: 14/10/22 Buscar no serviço de owners
-		//return this.owners.findPetTypes();
-		return List.of(new PetType());
+		return ownerClient.findPetTypes();
 	}
 
 	@ModelAttribute("owner")
 	public Owner findOwner(@PathVariable("ownerId") int ownerId) {
-		// TODO: 14/10/22 Buscar no serviço de owners
-		//return this.owners.findById(ownerId);
-		return new Owner();
+		return ownerClient.findOwner(ownerId);
 	}
 
 	@ModelAttribute("pet")
 	public Pet findPet(@PathVariable("ownerId") int ownerId,
 			@PathVariable(name = "petId", required = false) Integer petId) {
-		//return petId == null ? new Pet() : this.owners.findById(ownerId).getPet(petId);
-		// TODO: 14/10/22 Buscar no serviço de owners
-		return new Pet();
+		return petId == null ? new Pet() : ownerClient.findOwner(ownerId).getPet(petId);
 	}
 
 	@InitBinder("owner")
@@ -93,9 +93,8 @@ class PetController {
 			model.put("pet", pet);
 			return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 		}
-		// TODO: 14/10/22 Salvar no serviço de owners
-		//this.owners.save(owner);
-		return "redirect:/owners/{ownerId}";
+		owner = ownerClient.saveOwner(owner);
+		return "redirect:/owners/" + owner.getId();
 	}
 
 	@GetMapping("/pets/{petId}/edit")
@@ -112,10 +111,10 @@ class PetController {
 			return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 		}
 
-		owner.addPet(pet);
-		// TODO: 14/10/22 Salvar no serviço de owners
-		//this.owners.save(owner);
-		return "redirect:/owners/{ownerId}";
+		owner.getPets().removeIf(existingPet -> existingPet.getId().equals(pet.getId()));
+		owner.getPets().add(pet);
+		owner = ownerClient.saveOwner(owner);
+		return "redirect:/owners/" + owner.getId();
 	}
 
 }

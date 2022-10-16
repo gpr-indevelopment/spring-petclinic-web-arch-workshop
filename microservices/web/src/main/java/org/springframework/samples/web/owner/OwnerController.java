@@ -16,8 +16,7 @@
 package org.springframework.samples.web.owner;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.samples.web.external.OwnerClient;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -43,6 +42,12 @@ import java.util.Map;
 @Controller
 class OwnerController {
 
+	private final OwnerClient ownerClient;
+
+	public OwnerController(OwnerClient ownerClient) {
+		this.ownerClient = ownerClient;
+	}
+
 	private static final String VIEWS_OWNER_CREATE_OR_UPDATE_FORM = "owners/createOrUpdateOwnerForm";
 
 	@InitBinder
@@ -52,9 +57,10 @@ class OwnerController {
 
 	@ModelAttribute("owner")
 	public Owner findOwner(@PathVariable(name = "ownerId", required = false) Integer ownerId) {
-		// return ownerId == null ? new Owner() : this.owners.findById(ownerId);
-		// TODO: 14/10/22 Buscar no serviço de owners
-		return new Owner();
+		if (ownerId == null) {
+			return new Owner();
+		}
+		return ownerClient.findOwner(ownerId);
 	}
 
 	@GetMapping("/owners/new")
@@ -69,9 +75,7 @@ class OwnerController {
 		if (result.hasErrors()) {
 			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 		}
-		//this.owners.save(owner);
-		// TODO: 14/10/22 Salvar no serviço de owners
-		owner.setId(13);
+		owner = ownerClient.saveOwner(owner);
 		return "redirect:/owners/" + owner.getId();
 	}
 
@@ -118,18 +122,12 @@ class OwnerController {
 	}
 
 	private Page<Owner> findPaginatedForOwnersLastName(int page, String lastname) {
-		int pageSize = 5;
-		Pageable pageable = PageRequest.of(page - 1, pageSize);
-		// return owners.findByLastName(lastname, pageable);
-		// TODO: 14/10/22 Buscar no serviço de owners
-		return Page.empty();
+		return ownerClient.findOwners(page, lastname);
 	}
 
 	@GetMapping("/owners/{ownerId}/edit")
 	public String initUpdateOwnerForm(@PathVariable("ownerId") int ownerId, Model model) {
-		// Owner owner = this.owners.findById(ownerId);
-		// TODO: 14/10/22 Buscar no serviço de owner
-		Owner owner = new Owner();
+		Owner owner = ownerClient.findOwner(ownerId);
 		model.addAttribute(owner);
 		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 	}
@@ -142,9 +140,8 @@ class OwnerController {
 		}
 
 		owner.setId(ownerId);
-		//this.owners.save(owner);
-		// TODO: 14/10/22 Salvar no serviço de owner
-		return "redirect:/owners/{ownerId}";
+		owner = ownerClient.saveOwner(owner);
+		return "redirect:/owners/" + owner.getId();
 	}
 
 	/**
@@ -155,9 +152,7 @@ class OwnerController {
 	@GetMapping("/owners/{ownerId}")
 	public ModelAndView showOwner(@PathVariable("ownerId") int ownerId) {
 		ModelAndView mav = new ModelAndView("owners/ownerDetails");
-		// TODO: 14/10/22 Buscar no serviço de owners
-		//Owner owner = this.owners.findById(ownerId);
-		Owner owner = new Owner();
+		Owner owner = ownerClient.findOwner(ownerId);
 		mav.addObject(owner);
 		return mav;
 	}
