@@ -30,7 +30,7 @@ public class VetFunction implements Function<APIGatewayV2HTTPEvent, String> {
 				int pageSize = 5;
 				String pageStr = event.getQueryStringParameters().get("page");
 				if (pageStr == null || pageStr.isBlank()) {
-					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "/vets should have a page query param.");
+					pageStr = "1";
 				}
 				Integer page = Integer.parseInt(pageStr);
 				Pageable pageable = PageRequest.of(page - 1, pageSize);

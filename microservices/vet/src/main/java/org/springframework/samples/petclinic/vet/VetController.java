@@ -41,7 +41,7 @@ class VetController {
 	}
 
 	@GetMapping("/vets")
-	public Page<Vet> findPaginated(@RequestParam int page) {
+	public Page<Vet> findPaginated(@RequestParam(defaultValue = "1") int page) {
 		int pageSize = 5;
 		Pageable pageable = PageRequest.of(page - 1, pageSize);
 		return vetRepository.findAll(pageable);
